@@ -2,6 +2,7 @@ package com.harsh.photo.user.api.security;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 
 import javax.servlet.FilterChain;
@@ -18,12 +19,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.harsh.photo.user.api.service.UsersService;
 import com.harsh.photo.user.api.shared.UserDTO;
 import com.harsh.photo.user.api.ui.model.LoginRequest;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
@@ -68,11 +70,18 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		
 		//Algorithm algo = Algorithm.HMAC512(environment.getProperty("token.hmac512.secret"));
 		
-		@SuppressWarnings("deprecation")
-		String token = JWT.create()
-				.withSubject(userDTO.getUserID())
-				.withExpiresAt(new Date(System.currentTimeMillis() + Long.parseLong(environment.getProperty("token.expiration.time"))))
-				.sign(Algorithm.HMAC512(environment.getProperty("token.hmac512.secret")));
+//		@SuppressWarnings("deprecation")
+//		String token = JWT.create()
+//				.withSubject(userDTO.getUserID())
+//				.withExpiresAt(new Date(System.currentTimeMillis() + Long.parseLong(environment.getProperty("token.expiration.time"))))
+//				.sign(Algorithm.HMAC512(environment.getProperty("token.hmac512.secret")));
+		
+		String token = Jwts.builder()
+                .setSubject(userDTO.getUserID())
+                .setExpiration(new Date(System.currentTimeMillis() + Long.parseLong(environment.getProperty("token.expiration.time"))))
+                .signWith(SignatureAlgorithm.HS512, environment.getProperty("token.hmac512.secret") )
+                .compact();
+		
 		
 		response.addHeader("token", token);
 		response.addHeader("userID", userDTO.getUserID());
