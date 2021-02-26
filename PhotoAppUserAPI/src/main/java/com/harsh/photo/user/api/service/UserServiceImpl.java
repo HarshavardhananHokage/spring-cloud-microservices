@@ -1,10 +1,14 @@
 package com.harsh.photo.user.api.service;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +18,10 @@ import com.harsh.photo.user.api.shared.UserDTO;
 
 @Service
 public class UserServiceImpl implements UsersService {
-	
+
 	UsersRepository usersRepository;
 	BCryptPasswordEncoder bCryptPasswordEncoder;
-	
+
 	@Autowired
 	public UserServiceImpl(UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
 		this.usersRepository = usersRepository;
@@ -26,21 +30,44 @@ public class UserServiceImpl implements UsersService {
 
 	@Override
 	public UserDTO createUser(UserDTO userDetails) {
-		
+
 		userDetails.setUserID(UUID.randomUUID().toString());
-		
+
 		ModelMapper mapper = new ModelMapper();
 		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-		
+
 		UserEntity userEntity = mapper.map(userDetails, UserEntity.class);
 		userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(userDetails.getPassword()));
 		System.out.println("User Entity: " + userEntity.toString());
-		
+
 		userEntity = usersRepository.save(userEntity);
-		
-		userDetails = mapper.map(userEntity, UserDTO.class); 
-		
+
+		userDetails = mapper.map(userEntity, UserDTO.class);
+
 		return userDetails;
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		UserEntity userEntity = usersRepository.findByemailID(username);
+
+		if (userEntity == null)
+			throw new UsernameNotFoundException(username);
+
+		User user = new User(userEntity.getEmailID(), userEntity.getEncryptedPassword(), true, true, true, true,
+				new ArrayList<>());
+		return user;
+	}
+
+	@Override
+	public UserDTO getUserByEmail(String emailID) {
+		UserEntity userEntity = usersRepository.findByemailID(emailID);
+
+		if (userEntity == null)
+			throw new UsernameNotFoundException(emailID);
+
+		UserDTO userDTO = new ModelMapper().map(userEntity, UserDTO.class);
+		return userDTO;
 	}
 
 }
