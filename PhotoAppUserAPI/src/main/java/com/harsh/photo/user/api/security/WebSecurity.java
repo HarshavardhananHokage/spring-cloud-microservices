@@ -32,15 +32,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable();
 	    http.headers().frameOptions().disable();
-		http.authorizeRequests().antMatchers("/**").hasIpAddress(environment.getProperty("gateway.ip"))
-			.and()
-			.authorizeRequests().antMatchers("/h2-console").permitAll()
+		http.authorizeRequests().antMatchers("/h2-console").permitAll()
 			.and()
 			.addFilter(getAuthenticationFilter());
 	}
 
 	private AuthenticationFilter getAuthenticationFilter() throws Exception {
 		AuthenticationFilter authenticationFilter = new AuthenticationFilter(this.environment, this.usersService, authenticationManager());
+		System.out.println("Login URL: "+environment.getProperty("users.login.url"));
 		authenticationFilter.setFilterProcessesUrl(environment.getProperty("users.login.url"));
 		return authenticationFilter;
 	}

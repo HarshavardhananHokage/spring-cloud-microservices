@@ -67,6 +67,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		String emailID = ((User) authResult.getPrincipal()).getUsername();
 		
 		UserDTO userDTO = usersService.getUserByEmail(emailID);
+		System.out.println("Expiration Time: " +Long.parseLong(environment.getProperty("token.expiration.time")));
 		
 		//Algorithm algo = Algorithm.HMAC512(environment.getProperty("token.hmac512.secret"));
 		
