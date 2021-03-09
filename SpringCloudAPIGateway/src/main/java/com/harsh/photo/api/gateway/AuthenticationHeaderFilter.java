@@ -35,7 +35,7 @@ public class AuthenticationHeaderFilter extends AbstractGatewayFilterFactory<Aut
 
 			ServerHttpRequest request = exchange.getRequest();
 
-			System.out.println(request.getMethod().toString() + " BODY " + request.getBody().toString());
+			//System.out.println(request.getMethod().toString() + " BODY " + request.getBody().toString());
 			if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION))
 				return onError(exchange, "No Authorization Header", HttpStatus.UNAUTHORIZED);
 
@@ -52,12 +52,12 @@ public class AuthenticationHeaderFilter extends AbstractGatewayFilterFactory<Aut
 	public boolean isValidJWT(String jwt) {
 
 		String user = null;
-		System.out.println("Secret: " +environment.getProperty("token.hmac512.secret"));
+		//System.out.println("Secret: " +environment.getProperty("token.hmac512.secret"));
 		try {
 			user = Jwts.parser().setSigningKey(environment.getProperty("token.hmac512.secret")).parseClaimsJws(jwt).getBody()
 					.getSubject();
 			
-			System.out.println("User from JWT: " +user);
+			//System.out.println("User from JWT: " +user);
 
 		} catch (Exception e) {
 			e.printStackTrace();
